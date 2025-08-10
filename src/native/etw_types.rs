@@ -173,6 +173,23 @@ impl std::default::Default for DumpFileLoggingMode {
         Self::EVENT_TRACE_FILE_MODE_NONE
     }
 }
+#[derive(Debug, Copy, Clone)]
+#[allow(dead_code)]
+#[non_exhaustive]
+#[repr(u32)]
+pub enum ClockType {
+    /// Raw clock type.
+    ///
+    /// This is the default clock type.
+    Raw,
+    /// Performance clock type (QPC).
+    ///
+    Performance,
+    /// System time clock type.
+    ///
+    /// This clock type is the system time, useful for correlation with other system events.
+    SystemTime,
+}
 
 /// The data source the trace is subscribed to
 #[derive(Clone, Debug)]
@@ -227,7 +244,7 @@ impl EventTraceProperties {
         etw_trace_properties.Wnode.BufferSize = std::mem::size_of::<EventTraceProperties>() as u32;
         etw_trace_properties.Wnode.Guid = T::trace_guid();
         etw_trace_properties.Wnode.Flags = Etw::WNODE_FLAG_TRACED_GUID;
-        etw_trace_properties.Wnode.ClientContext = 1; // QPC clock resolution
+        etw_trace_properties.Wnode.ClientContext = trace_properties.clock_type as u32;
         etw_trace_properties.BufferSize = trace_properties.buffer_size;
         etw_trace_properties.MinimumBuffers = trace_properties.min_buffer;
         etw_trace_properties.MaximumBuffers = trace_properties.max_buffer;

@@ -13,7 +13,7 @@ use windows::Win32::System::Diagnostics::Etw;
 
 use self::private::{PrivateRealTimeTraceTrait, PrivateTraceTrait};
 
-use crate::native::etw_types::{EventTraceProperties, SubscriptionSource};
+use crate::native::etw_types::{ClockType, EventTraceProperties, SubscriptionSource};
 use crate::native::evntrace::{
     close_trace, control_trace, control_trace_by_name, enable_provider, open_trace, process_trace,
     start_trace, ControlHandle, TraceHandle,
@@ -71,6 +71,8 @@ pub struct TraceProperties {
     pub flush_timer: Duration,
     /// Represents the ETW Session [Logging Mode](https://docs.microsoft.com/en-us/windows/win32/etw/logging-mode-constants)
     pub log_file_mode: LoggingMode,
+    /// Represents the ETW Session clock type. By default, it is set to `Performance`.
+    pub clock_type: ClockType,
 }
 
 impl Default for TraceProperties {
@@ -83,6 +85,7 @@ impl Default for TraceProperties {
             flush_timer: Duration::from_secs(1),
             log_file_mode: LoggingMode::EVENT_TRACE_REAL_TIME_MODE
                 | LoggingMode::EVENT_TRACE_NO_PER_PROCESSOR_BUFFERING,
+            clock_type: ClockType::Performance,
         }
     }
 }
@@ -438,6 +441,14 @@ impl<T: RealTimeTraceTrait + PrivateRealTimeTraceTrait> TraceBuilder<T> {
     /// These are part of [`EVENT_TRACE_PROPERTIES`](https://learn.microsoft.com/en-us/windows/win32/api/evntrace/ns-evntrace-event_trace_properties)
     pub fn set_trace_properties(mut self, props: TraceProperties) -> Self {
         self.properties = props;
+        self
+    }
+
+    /// Set the clock type for the trace, which defines the resolution of the timestamp.
+    ///
+    /// By default, it is set to `Performance`.
+    pub fn set_clock_type(mut self, clock_type: ClockType) -> Self {
+        self.properties.clock_type = clock_type;
         self
     }
 

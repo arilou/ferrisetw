@@ -215,6 +215,12 @@ pub struct EventTraceProperties {
     wide_etl_dump_file_path: [u16; TRACE_NAME_MAX_CHARS + 1], // The +1 leaves space for the final null widechar.
 }
 
+/// Allow the EventTraceProperties to be sent and synced across threads
+///
+/// This is needed because the `EVENT_TRACE_PROPERTIES` is using unsafe pointer to a HANDLE.
+unsafe impl Send for EventTraceProperties {}
+unsafe impl Sync for EventTraceProperties {}
+
 impl std::fmt::Debug for EventTraceProperties {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let name = U16CString::from_vec_truncate(self.wide_trace_name).to_string_lossy();

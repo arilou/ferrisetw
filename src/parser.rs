@@ -319,6 +319,11 @@ impl<'schema, 'record> Parser<'schema, 'record> {
         use crate::parser::private::TryParse;
         self.try_parse_impl(name)
     }
+
+    /// Check if a property exists in the event.
+    pub fn exists(&self, name: &str) -> bool {
+        self.find_property(name).is_ok()
+    }
 }
 
 mod private {
